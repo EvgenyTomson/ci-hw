@@ -5,6 +5,11 @@ on:
     tags:
       - 'v[0-9]+'
 
+env:
+  file_name: issie_data.txt
+  path: ./
+  artifact_name: artifact_1
+
 jobs:
 
   commitlint:
@@ -74,6 +79,7 @@ jobs:
          tag: ${{ github.ref_name }}
          writeToFile: false
       - name: Create an issue
+        id: create-issue
         uses: JasonEtco/create-an-issue@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -81,6 +87,16 @@ jobs:
           RELEASE_AUTHOR: ${{ github.actor }}
           RELEASE_NO: ${{ github.ref_name }}
           RELEASE_DATE: ${{ github.event.repository.updated_at}}
+
+      - name: Create artifact data
+        run:
+          echo ${{ steps.create-issue.outputs.number }} > ${{ env.path }}${{ env.file_name }}
+      - name: Save Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.artifact_name }}
+          path: ${{ env.path }}${{ env.file_name }}
+          retention-days: 30
 
   deploy:
     name: Create build and deploy on gh-pages
@@ -107,7 +123,36 @@ jobs:
       uses: JamesIves/github-pages-deploy-action@v4
       with:
         folder: build
-      # run: npm run deploy
-      # run: |
-      #   git remote set-url origin https://git:${GITHUB_TOKEN}@github.com/${GITHUB_REPOSITORY}.git
-      #   npm run deploy -- -u "github-actions-bot <support+actions@github.com>"
+
+  close:
+    name: Close Release Issue after successful deploy
+    needs: [deploy]
+    permissions:
+      contents: write
+      issues: write
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ env.artifact_name }}
+          path: ${{ env.path }}
+      - name: Read artifact
+        id: getissue
+        run:
+          issie_num = cat ${{ env.path }}${{ env.file_name }}
+
+      - name: Close issue
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue_number = parseInt(${{ steps.getissue.outputs.issie_num }});
+            const [person, repository] = '${{ github.repository }}'.split('/');
+            github.rest.issues.update({
+              owner: person,
+              repo: repository,
+              issue_number: issue_number,
+              state: "closed"
+            });
