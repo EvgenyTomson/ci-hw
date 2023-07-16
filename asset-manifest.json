@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/ci-hw/static/css/main.bca2b5ee.css",
+    "main.js": "/ci-hw/static/js/main.7fd664e5.js",
+    "index.html": "/ci-hw/index.html",
+    "main.bca2b5ee.css.map": "/ci-hw/static/css/main.bca2b5ee.css.map",
+    "main.7fd664e5.js.map": "/ci-hw/static/js/main.7fd664e5.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.bca2b5ee.css",
+    "static/js/main.7fd664e5.js"
+  ]
+}
