@@ -92,20 +92,20 @@ jobs:
           RELEASE_NO: ${{ github.ref_name }}
           RELEASE_DATE: ${{ github.event.repository.updated_at}}
 
-      - name: Save Issue Number
-        run: |
-          echo "number=${{ steps.create-issue.outputs.number }}"
-          echo "number=${{ steps.create-issue.outputs.number }}" >> "$GITHUB_OUTPUT"
+      # - name: Save Issue Number
+      #   run: |
+      #     echo "number=${{ steps.create-issue.outputs.number }}"
+      #     echo "number=${{ steps.create-issue.outputs.number }}" >> "$GITHUB_OUTPUT"
 
-      # - name: Create artifact data
-      #   run:
-      #     echo ${{ steps.create-issue.outputs.number }} > ${{ env.path }}${{ env.file_name }}
-      # - name: Save Artifact
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: ${{ env.artifact_name }}
-      #     path: ${{ env.path }}${{ env.file_name }}
-      #     retention-days: 30
+      - name: Create artifact data
+        run:
+          echo ${{ steps.create-issue.outputs.number }} > ${{ env.path }}${{ env.file_name }}
+      - name: Save Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ env.artifact_name }}
+          path: ${{ env.path }}${{ env.file_name }}
+          retention-days: 30
 
   deploy:
     name: Create build and deploy on gh-pages
@@ -136,10 +136,10 @@ jobs:
   close:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      OUTPUT1: ${{ needs.release.outputs.issue }}
+      # OUTPUT1: ${{ needs.release.outputs.issue }}
 
-    outputs:
-      getissue: ${{ steps.getissue.outputs.issue }}
+    # outputs:
+    #   getissue: ${{ steps.getissue.outputs.issue }}
 
     name: Close Release Issue after successful deploy
     needs: [deploy]
@@ -151,25 +151,23 @@ jobs:
     steps:
       - name: Set up GitHub Actions
         uses: actions/checkout@v3
-      # - name: Download artifact
-      #   uses: actions/download-artifact@v3
-      #   with:
-      #     name: ${{ env.artifact_name }}
-      #     path: ${{ env.path }}
-      # - name: Read artifact
-      #   id: getissue
-      #   run:
-      #     value=`cat ${{ env.path }}${{ env.file_name }}`
-      #     echo `ISSUE_NUM=$value` >> $GITHUB_OUTPUT
-
-      # - name: Show Issue Number
-      #   run:
-      #     run: echo {{ $OUTPUT1 }}
+      - name: Download artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: ${{ env.artifact_name }}
+          path: ${{ env.path }}
+      - name: Read artifact
+        id: getissue
+        run: |
+          value=`cat ${{ env.path }}${{ env.file_name }}`
+          echo "issuie_num=$value" >> $GITHUB_ENV
+        # echo `ISSUE_NUM=$value` >> $GITHUB_OUTPUT
 
       - name: Close issue
         run: |
-          echo "number=$OUTPUT1"
-          gh issue close $OUTPUT1
+          echo "${{ env.issuie_num }}"
+          gh issue close ${{ env.issuie_num }}
+        # echo "number=$OUTPUT1"
         # gh issue close ${{ needs.release.outputs.issue }}
         # gh issue close 21
         # gh issue close ${{ needs.getissue.outputs.issue }}
