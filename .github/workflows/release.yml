@@ -136,7 +136,7 @@ jobs:
   close:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      OUTPUT1: ${{needs.release.outputs.issue}}
+      OUTPUT1: ${{ needs.release.outputs.issue }}
 
     outputs:
       getissue: ${{ steps.getissue.outputs.issue }}
@@ -167,7 +167,9 @@ jobs:
       #     run: echo {{ $OUTPUT1 }}
 
       - name: Close issue
-        run:
-          gh issue close ${{needs.release.outputs.issue}}
-          # gh issue close 21
-          # gh issue close ${{ needs.getissue.outputs.issue }}
+        run: |
+          echo "number=$OUTPUT1"
+          gh issue close $OUTPUT1
+        # gh issue close ${{ needs.release.outputs.issue }}
+        # gh issue close 21
+        # gh issue close ${{ needs.getissue.outputs.issue }}
