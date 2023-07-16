@@ -158,8 +158,8 @@ jobs:
 
       - name: Close issue
         run:
-          gh issue close ${{needs.release.outputs.issue}}
-          # gh issue close 21
+          # gh issue close ${{needs.release.outputs.issue}}
+          gh issue close 21
           # gh issue close ${{ needs.getissue.outputs.issue }}
         # uses: actions/github-script@v6
         # with:
