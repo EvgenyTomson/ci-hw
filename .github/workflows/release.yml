@@ -151,15 +151,17 @@ jobs:
           # echo "${{ env.artifact_name }}" && cat ${{ env.path }}${{ env.file_name }} >> $GITHub_ENV
 
       - name: Close issue
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const issue_number = parseInt(${{ needs.getissue.outputs.issue }});
-            const [person, repository] = '${{ github.repository }}'.split('/');
-            github.rest.issues.update({
-              owner: person,
-              repo: repository,
-              issue_number: issue_number,
-              state: "closed"
-            });
+        run:
+          gh issue close ${{ needs.getissue.outputs.issue }}
+        # uses: actions/github-script@v6
+        # with:
+        #   github-token: ${{ secrets.GITHUB_TOKEN }}
+        #   script: |
+        #     const issue_number = parseInt(${{ needs.getissue.outputs.issue }});
+        #     const [person, repository] = '${{ github.repository }}'.split('/');
+        #     github.rest.issues.update({
+        #       owner: person,
+        #       repo: repository,
+        #       issue_number: issue_number,
+        #       state: "closed"
+        #     });
