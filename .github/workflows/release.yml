@@ -68,6 +68,10 @@ jobs:
       contents: read
       issues: write
     runs-on: ubuntu-latest
+
+    outputs:
+      issue: ${{ steps.create-issue.outputs.number }}
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
@@ -125,6 +129,8 @@ jobs:
         folder: build
 
   close:
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     outputs:
       getissue: ${{ steps.getissue.outputs.issue }}
@@ -152,7 +158,8 @@ jobs:
 
       - name: Close issue
         run:
-          gh issue close 21
+          gh issue close ${{needs.release.outputs.issue}}
+          # gh issue close 21
           # gh issue close ${{ needs.getissue.outputs.issue }}
         # uses: actions/github-script@v6
         # with:
