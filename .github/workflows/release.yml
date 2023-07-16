@@ -92,15 +92,20 @@ jobs:
           RELEASE_NO: ${{ github.ref_name }}
           RELEASE_DATE: ${{ github.event.repository.updated_at}}
 
-      - name: Create artifact data
-        run:
-          echo ${{ steps.create-issue.outputs.number }} > ${{ env.path }}${{ env.file_name }}
-      - name: Save Artifact
-        uses: actions/upload-artifact@v3
-        with:
-          name: ${{ env.artifact_name }}
-          path: ${{ env.path }}${{ env.file_name }}
-          retention-days: 30
+      - name: Save Issue Number
+        run: |
+          echo "number=${{ steps.create-issue.outputs.number }}"
+          echo "number=${{ steps.create-issue.outputs.number }}" >> "$GITHUB_OUTPUT"
+
+      # - name: Create artifact data
+      #   run:
+      #     echo ${{ steps.create-issue.outputs.number }} > ${{ env.path }}${{ env.file_name }}
+      # - name: Save Artifact
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: ${{ env.artifact_name }}
+      #     path: ${{ env.path }}${{ env.file_name }}
+      #     retention-days: 30
 
   deploy:
     name: Create build and deploy on gh-pages
@@ -131,6 +136,7 @@ jobs:
   close:
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      OUTPUT1: ${{needs.release.outputs.issue}}
 
     outputs:
       getissue: ${{ steps.getissue.outputs.issue }}
@@ -145,33 +151,23 @@ jobs:
     steps:
       - name: Set up GitHub Actions
         uses: actions/checkout@v3
-      - name: Download artifact
-        uses: actions/download-artifact@v3
-        with:
-          name: ${{ env.artifact_name }}
-          path: ${{ env.path }}
-      - name: Read artifact
-        id: getissue
-        run:
-          value=`cat ${{ env.path }}${{ env.file_name }}`
-          echo `ISSUE_NUM=$value` >> $GITHUB_OUTPUT
-          # echo "SERVER_IP='$(hostname -I | awk '{print $1}')'" >> $GITHub_ENV
-          # echo "${{ env.artifact_name }}" && cat ${{ env.path }}${{ env.file_name }} >> $GITHub_ENV
+      # - name: Download artifact
+      #   uses: actions/download-artifact@v3
+      #   with:
+      #     name: ${{ env.artifact_name }}
+      #     path: ${{ env.path }}
+      # - name: Read artifact
+      #   id: getissue
+      #   run:
+      #     value=`cat ${{ env.path }}${{ env.file_name }}`
+      #     echo `ISSUE_NUM=$value` >> $GITHUB_OUTPUT
+
+      # - name: Show Issue Number
+      #   run:
+      #     run: echo {{ $OUTPUT1 }}
 
       - name: Close issue
         run:
-          # gh issue close ${{needs.release.outputs.issue}}
-          gh issue close 21
+          gh issue close ${{needs.release.outputs.issue}}
+          # gh issue close 21
           # gh issue close ${{ needs.getissue.outputs.issue }}
-        # uses: actions/github-script@v6
-        # with:
-        #   github-token: ${{ secrets.GITHUB_TOKEN }}
-        #   script: |
-        #     const issue_number = parseInt(${{ needs.getissue.outputs.issue }});
-        #     const [person, repository] = '${{ github.repository }}'.split('/');
-        #     github.rest.issues.update({
-        #       owner: person,
-        #       repo: repository,
-        #       issue_number: issue_number,
-        #       state: "closed"
-        #     });
