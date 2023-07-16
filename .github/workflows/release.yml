@@ -146,13 +146,14 @@ jobs:
         id: getissue
         run:
           value=`cat ${{ env.path }}${{ env.file_name }}`
-          echo `ISSUE_NUM=$value` >> $env:GITHUB_OUTPUT
+          echo `ISSUE_NUM=$value` >> $GITHUB_OUTPUT
           # echo "SERVER_IP='$(hostname -I | awk '{print $1}')'" >> $GITHub_ENV
           # echo "${{ env.artifact_name }}" && cat ${{ env.path }}${{ env.file_name }} >> $GITHub_ENV
 
       - name: Close issue
         run:
-          gh issue close ${{ needs.getissue.outputs.issue }}
+          gh issue close 21
+          # gh issue close ${{ needs.getissue.outputs.issue }}
         # uses: actions/github-script@v6
         # with:
         #   github-token: ${{ secrets.GITHUB_TOKEN }}
