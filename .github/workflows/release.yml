@@ -125,6 +125,10 @@ jobs:
         folder: build
 
   close:
+
+    outputs:
+      getissue: ${{ steps.getissue.outputs.issue }}
+
     name: Close Release Issue after successful deploy
     needs: [deploy]
     permissions:
@@ -142,7 +146,7 @@ jobs:
         id: getissue
         run:
           value=`cat ${{ env.path }}${{ env.file_name }}`
-          echo `ISSUE_NUM=$value` >> $GITHub_ENV
+          echo `ISSUE_NUM=$value` >> $env:GITHUB_OUTPUT
           # echo "SERVER_IP='$(hostname -I | awk '{print $1}')'" >> $GITHub_ENV
           # echo "${{ env.artifact_name }}" && cat ${{ env.path }}${{ env.file_name }} >> $GITHub_ENV
 
@@ -151,7 +155,7 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const issue_number = parseInt(${{ env.ISSUE_NUM }});
+            const issue_number = parseInt(${{ needs.getissue.outputs.issue }});
             const [person, repository] = '${{ github.repository }}'.split('/');
             github.rest.issues.update({
               owner: person,
