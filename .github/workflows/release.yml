@@ -141,14 +141,17 @@ jobs:
       - name: Read artifact
         id: getissue
         run:
-          issie_num = cat ${{ env.path }}${{ env.file_name }}
+          value=`cat ${{ env.path }}${{ env.file_name }}`
+          echo `ISSUE_NUM=$value` >> $GITHub_ENV
+          # echo "SERVER_IP='$(hostname -I | awk '{print $1}')'" >> $GITHub_ENV
+          # echo "${{ env.artifact_name }}" && cat ${{ env.path }}${{ env.file_name }} >> $GITHub_ENV
 
       - name: Close issue
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const issue_number = parseInt(${{ steps.getissue.outputs.issie_num }});
+            const issue_number = parseInt(${{ env.ISSUE_NUM }});
             const [person, repository] = '${{ github.repository }}'.split('/');
             github.rest.issues.update({
               owner: person,
